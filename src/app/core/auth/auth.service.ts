@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Observable, Subject, throwError } from 'rxjs';
 import { ErrorResponse } from 'src/app/models/error-response.type';
 import { SuccessResponse } from 'src/app/models/success-response.type';
 import { environment } from 'src/environments/environment';
@@ -35,6 +35,46 @@ export class AuthService {
     );
   }
 
+  logOut(): Observable<ErrorResponse> {
+    const tokens = this.getTokens();
+    if (tokens && tokens.refreshToken) {
+      return this.http.post<ErrorResponse>(environment.auth + 'logout', {
+        refreshToken: tokens.refreshToken,
+      });
+    }
+    throw throwError(() => 'Can not find token');
+  }
+
+  signUp(
+    email: string,
+    password: string,
+    passwordRepeat: string
+  ): Observable<ErrorResponse | SuccessResponse> {
+    return this.http.post<ErrorResponse | SuccessResponse>(
+      environment.auth + 'signup',
+      {
+        email,
+        password,
+        passwordRepeat,
+      }
+    );
+  }
+
+  logInTest() {
+    this.isLogged = true;
+    this.isLogged$.next(true);
+  }
+
+  logOutTest() {
+    this.isLogged = false;
+    this.isLogged$.next(false);
+  }
+
+  signUpTest() {
+    this.isLogged = true;
+    this.isLogged$.next(true);
+  }
+
   public getIsLoggedIn() {
     return this.isLogged;
   }
@@ -53,7 +93,7 @@ export class AuthService {
     this.isLogged$.next(false);
   }
 
-  public getTokens(accessToken: string | null, refreshToken: string | null) {
+  public getTokens() {
     return {
       accessToken: localStorage.getItem(this.accessTokenKey),
       refreshToken: localStorage.getItem(this.refreshTokenKey),

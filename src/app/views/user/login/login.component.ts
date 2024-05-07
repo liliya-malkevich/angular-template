@@ -73,4 +73,8 @@ export class LoginComponent implements OnInit {
         });
     }
   }
+  loginTest() {
+    this.authService.logInTest();
+    this.router.navigate(['/']);
+  }
 }
